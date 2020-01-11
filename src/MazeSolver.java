@@ -5,6 +5,16 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.StringTokenizer;
+import java.awt.event.*;
+import java.awt.*;
+import javax.swing.*;
+import javax.swing.event.*;  // Needed for ActionListener
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+import java.io.*;
+import java.util.Random;
+import javax.imageio.ImageIO;
 
 public class MazeSolver {
 	
@@ -37,23 +47,46 @@ public class MazeSolver {
 		
 	}
 	
-	class Grid {
+	class Grid extends JFrame {
 		
-		private HashMap<GridSquare, LinkedList<GridSquare>> gridHashMap;
-		private GridSquare[][] gridArr;
+		//private GridSquare[][] gridArr;
+		private Set<GridSquare> gridSet;
 		
 		public Grid(int rows, int cols) {
 			
-			gridHashMap = new HashMap<>();
-			gridArr = new GridSquare[rows][cols];
-			
+			//gridArr = new GridSquare[rows][cols];
+			gridSet = new HashSet<>();
 			
 			for (int i = 0; i < rows; i++) {
 				for (int j = 0; j < cols; j++) {
-					
+					gridSet.add(new GridSquare(i, j));
 				}
 			}
+			
+			
+			addMouseListener(new MouseAdapter(){
+				public void mousePressed (MouseEvent e){
+	                
+	            }
+	            public void mouseExited (MouseEvent e){
+
+	            }
+	            public void mouseEntered (MouseEvent e){
+
+	            }
+	            public void mouseReleased (MouseEvent e){
+
+	            }
+	            public void mouseClicked (MouseEvent e){
+
+	            }
+			});
 		}
+		
+		
+		
+		
+		
 	}
 	
 	
