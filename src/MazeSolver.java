@@ -20,22 +20,24 @@ public class MazeSolver {
 	
 	class GridSquare {
 		
-		private int row, col;
+//		private int row, col;
 		private boolean visited;
+		private boolean valid;
 		
-		public GridSquare (int row, int col) {
-			this.row = row;
-			this.col = col;
+		public GridSquare () {
+//			this.row = row;
+//			this.col = col;
 			visited = false;
+			valid = true;
 		}
 		
-		public int getRow() {
-			return row;
-		}
-		
-		public int getCol() {
-			return col;
-		}
+//		public int getRow() {
+//			return row;
+//		}
+//		
+//		public int getCol() {
+//			return col;
+//		}
 		
 		public boolean getVisited() {
 			return visited;
@@ -45,29 +47,38 @@ public class MazeSolver {
 			visited = true;
 		}
 		
+		void turnIntoWall () {
+			valid = false;
+		}
+		
 	}
 	
 	class Grid extends JFrame {
 		
-		//private GridSquare[][] gridArr;
-		private Set<GridSquare> gridSet;
+		private GridSquare[][] gridArr;
+//		private Set<GridSquare> gridSet;
+		
 		
 		public Grid(int rows, int cols) {
 			
-			//gridArr = new GridSquare[rows][cols];
-			gridSet = new HashSet<>();
+			gridArr = new GridSquare[rows][cols];
+//			gridSet = new HashSet<>();
+			
 			
 			for (int i = 0; i < rows; i++) {
 				for (int j = 0; j < cols; j++) {
-					gridSet.add(new GridSquare(i, j));
+					gridArr[i][j] = new GridSquare();
 				}
 			}
 			
 			
 			addMouseListener(new MouseAdapter(){
 				public void mousePressed (MouseEvent e){
-	                
-	            }
+	                int rowPressed = e.getX(); // fix later
+	                int colPressed = e.getY();
+//	                gridSet.removeIf(square -> square.getRow() == rowPressed && square.getCol() == colPressed);
+	                gridArr[rowPressed][colPressed].turnIntoWall();
+				}
 	            public void mouseExited (MouseEvent e){
 
 	            }
