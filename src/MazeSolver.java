@@ -1,20 +1,9 @@
 import java.util.*;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.StringTokenizer;
 import java.awt.event.*;
 import java.awt.*;
 import javax.swing.*;
-import javax.swing.event.*;  // Needed for ActionListener
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.Scanner;
-import java.io.*;
-import java.util.Random;
-import javax.imageio.ImageIO;
 
 public class MazeSolver extends JFrame implements ActionListener{
 	
@@ -332,7 +321,6 @@ public class MazeSolver extends JFrame implements ActionListener{
 			int curY = endY;
 			pathX.add(curX);
 			pathY.add(curY);
-			gridArr[curX][curY].alongPath = true;
 			
 			
 			if (gridArr[curX][curY].getParRow() == -1 || gridArr[curX][curY].getParCol() == -1) {
@@ -340,15 +328,15 @@ public class MazeSolver extends JFrame implements ActionListener{
 			}
 			
 			while (!(startX == curX && startY == curY)) {
-	//			System.out.println("old = " + curX+ " "+ curY);
 				int tempX = gridArr[curX][curY].getParRow();
 				int tempY = gridArr[curX][curY].getParCol();
-	//			System.out.println("new = " + curX+ " "+ curY);
 				curX = tempX;
 				curY = tempY;
 				pathX.add(curX);
 				pathY.add(curY);
-				gridArr[curX][curY].alongPath = true;
+				if (!(startX == curX && startY == curY)) {
+					gridArr[curX][curY].alongPath = true;
+				}
 			}
 		
 		}
@@ -386,19 +374,11 @@ public class MazeSolver extends JFrame implements ActionListener{
 	}
 	
 	
-	
-
-
-	
-
     public static void main(String[] args) throws IOException {
 
     	MazeSolver g = new MazeSolver(16, 14);
 
     	
     }
-
-	
-	
 
 }
