@@ -99,7 +99,7 @@ public class MazeSolver extends JFrame implements ActionListener{
 		}
 		
 		public void paintComponent(Graphics g) {
-			visualize(g);
+			visualize(g, squareWidth, squareSpacing);
 		}
 	}
 
@@ -119,6 +119,10 @@ public class MazeSolver extends JFrame implements ActionListener{
 	int width;
 	int height;
 	
+	int squareWidth;
+	int squareSpacing;
+	
+	
 	public MazeSolver(int rows, int cols) {
 		
 		gridArr = new GridSquare[rows][cols];
@@ -129,8 +133,12 @@ public class MazeSolver extends JFrame implements ActionListener{
 		startCol = -1;
 		endRow = -1;
 		endCol = -1;
-		width = cols * 50;
-		height = rows * 50;
+		int maxDimension = (rows > cols) ? rows : cols;
+		squareWidth = 430 / maxDimension;
+		squareSpacing = squareWidth / 10;
+		width = cols * squareWidth;
+		height = rows * squareWidth;
+		squareWidth -= squareSpacing;
 		
 		
 		for (int i = 0; i < rows; i++) {
@@ -157,7 +165,7 @@ public class MazeSolver extends JFrame implements ActionListener{
 		buttons.add(wall);
 		buttons.add(runBFS);
 		buttons.setLayout(new FlowLayout());
-		Maze maze = new Maze(width + 50, height + 50); // _____________________________________________________________________________________________
+		Maze maze = new Maze(width + 15, height + 15); 
 		maze.setLayout(new FlowLayout());
 		
 		window.add(buttons);
@@ -166,9 +174,10 @@ public class MazeSolver extends JFrame implements ActionListener{
 		setContentPane(window);
 		pack();
 		setTitle ("Maze Solver");
-        setSize (500, 500); // ___________________________________________________________________________________________________________
+        setSize (500, height + 110); 
         setDefaultCloseOperation (JFrame.EXIT_ON_CLOSE);
-        this.setLocation(0,0);
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
         this.setVisible(true);
         
         
@@ -176,8 +185,8 @@ public class MazeSolver extends JFrame implements ActionListener{
 		
 		maze.addMouseListener(new MouseAdapter(){
 			public void mousePressed (MouseEvent e){
-                int colPressed = e.getX()/50;
-                int rowPressed = e.getY()/50;
+                int colPressed = e.getX()/(squareSpacing + squareWidth);
+                int rowPressed = e.getY()/(squareSpacing + squareWidth);
                 if (rowPressed >= 0 && rowPressed < gridArr.length && colPressed >= 0 && colPressed < gridArr[0].length) {
 		            if (addStart == true && gridArr[rowPressed][colPressed].getValid() == true) {
 		            	if (!(startRow == -1 && startCol == -1)) {
@@ -200,7 +209,6 @@ public class MazeSolver extends JFrame implements ActionListener{
 		            	clearPath();
 		            }
                 }
-                System.out.println(rowPressed + " " + colPressed);
                 repaint();
 			}
             public void mouseExited (MouseEvent e){
@@ -224,21 +232,30 @@ public class MazeSolver extends JFrame implements ActionListener{
 			addStart = true;
 			addEnd = false;
 			addWall = false;
+			start.setEnabled(false);
+			end.setEnabled(true);
+			wall.setEnabled(true);
 		}
 		if (e.getActionCommand().equals("Select End Point")) {
 			addStart = false;
 			addEnd = true;
 			addWall = false;
+			start.setEnabled(true);
+			end.setEnabled(false);
+			wall.setEnabled(true);
 		}
 		if (e.getActionCommand().equals("Add Wall")) {
 			addStart = false;
 			addEnd = false;
 			addWall = true;
+			start.setEnabled(true);
+			end.setEnabled(true);
+			wall.setEnabled(false);
 		}
 		if (e.getActionCommand().equals("Find Path")) {
-			bfs(startRow, startCol, gridArr[0].length, gridArr.length);
-			backtrack(startRow, startCol, endRow, endCol);
-			repaint();
+				bfs(startRow, startCol, gridArr[0].length, gridArr.length);
+				backtrack(startRow, startCol, endRow, endCol);
+				repaint();
 		}
 	}
 	
@@ -251,89 +268,93 @@ public class MazeSolver extends JFrame implements ActionListener{
 	}
 	
 	public void bfs(int startX, int startY, int gridCols, int gridRows) {
-		Queue<GridSquare> q = new LinkedList<GridSquare>();
-		q.add(gridArr[startX][startY]);
-		
-		while (!q.isEmpty()) {
-			int size = q.size();
+		if (startX != -1 && startY != -1) {
+			Queue<GridSquare> q = new LinkedList<GridSquare>();
+			q.add(gridArr[startX][startY]);
 			
-			for(int i =0; i <size; i++) {
-				GridSquare temp = q.remove();
-				int r = temp.getRow();
-				int c = temp.getCol();
+			while (!q.isEmpty()) {
+				int size = q.size();
 				
-				if((r+1)<gridRows && !gridArr[r+1][c].getVisited() && gridArr[r+1][c].getValid()) {
-					q.add(gridArr[r+1][c]);
-					gridArr[r+1][c].visited = true;
-					gridArr[r+1][c].parRow = r;
-					gridArr[r+1][c].parCol = c;
+				for(int i =0; i <size; i++) {
+					GridSquare temp = q.remove();
+					int r = temp.getRow();
+					int c = temp.getCol();
+					
+					if((r+1)<gridRows && !gridArr[r+1][c].getVisited() && gridArr[r+1][c].getValid()) {
+						q.add(gridArr[r+1][c]);
+						gridArr[r+1][c].visited = true;
+						gridArr[r+1][c].parRow = r;
+						gridArr[r+1][c].parCol = c;
+					}
+					
+					if((r-1)>=0 && !gridArr[r-1][c].getVisited() && gridArr[r-1][c].getValid()) {
+						q.add(gridArr[r-1][c]);
+						gridArr[r-1][c].visited = true;
+						gridArr[r-1][c].parRow = r;
+						gridArr[r-1][c].parCol = c;
+					}
+					
+					if((c+1)<gridCols && !gridArr[r][c+1].getVisited() && gridArr[r][c+1].getValid()) {
+						q.add(gridArr[r][c+1]);
+						gridArr[r][c+1].visited = true;
+						gridArr[r][c+1].parRow = r;
+						gridArr[r][c+1].parCol = c;
+					}
+					
+					if((c-1)>=0 && !gridArr[r][c-1].getVisited() && gridArr[r][c-1].getValid()) {
+						q.add(gridArr[r][c-1]);
+						gridArr[r][c-1].visited = true;
+						gridArr[r][c-1].parRow = r;
+						gridArr[r][c-1].parCol = c;
+					}
+					
+					
 				}
-				
-				if((r-1)>=0 && !gridArr[r-1][c].getVisited() && gridArr[r-1][c].getValid()) {
-					q.add(gridArr[r-1][c]);
-					gridArr[r-1][c].visited = true;
-					gridArr[r-1][c].parRow = r;
-					gridArr[r-1][c].parCol = c;
-				}
-				
-				if((c+1)<gridCols && !gridArr[r][c+1].getVisited() && gridArr[r][c+1].getValid()) {
-					q.add(gridArr[r][c+1]);
-					gridArr[r][c+1].visited = true;
-					gridArr[r][c+1].parRow = r;
-					gridArr[r][c+1].parCol = c;
-				}
-				
-				if((c-1)>=0 && !gridArr[r][c-1].getVisited() && gridArr[r][c-1].getValid()) {
-					q.add(gridArr[r][c-1]);
-					gridArr[r][c-1].visited = true;
-					gridArr[r][c-1].parRow = r;
-					gridArr[r][c-1].parCol = c;
-				}
-				
-				
 			}
 		}
 		
-		
+	}
+	
+	public boolean validFind (int endX, int endY) {
+		if (startRow != -1 && startCol != -1 && endRow != -1 && endCol != -1) {
+			if (gridArr[endX][endY].getParRow() != -1 && gridArr[endX][endY].getParCol() != -1) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public void backtrack(int startX, int startY, int endX, int endY) {
-		ArrayList<Integer> pathX = new ArrayList<>();
-		ArrayList<Integer> pathY = new ArrayList<>();
-		int curX = endX;
-		int curY = endY;
-		pathX.add(curX);
-		pathY.add(curY);
-		gridArr[curX][curY].alongPath = true;
-		
-		
-		if (gridArr[curX][curY].getParRow() == -1 || gridArr[curX][curY].getParCol() == -1) {
-			System.out.println("No path found.");
-		}
-		
-		while (!(startX == curX && startY == curY)) {
-//			System.out.println("old = " + curX+ " "+ curY);
-			int tempX = gridArr[curX][curY].getParRow();
-			int tempY = gridArr[curX][curY].getParCol();
-//			System.out.println("new = " + curX+ " "+ curY);
-			curX = tempX;
-			curY = tempY;
+		if (validFind(endX, endY)) {
+			ArrayList<Integer> pathX = new ArrayList<>();
+			ArrayList<Integer> pathY = new ArrayList<>();
+			int curX = endX;
+			int curY = endY;
 			pathX.add(curX);
 			pathY.add(curY);
 			gridArr[curX][curY].alongPath = true;
-		}
+			
+			
+			if (gridArr[curX][curY].getParRow() == -1 || gridArr[curX][curY].getParCol() == -1) {
+				System.out.println("No path found.");
+			}
+			
+			while (!(startX == curX && startY == curY)) {
+	//			System.out.println("old = " + curX+ " "+ curY);
+				int tempX = gridArr[curX][curY].getParRow();
+				int tempY = gridArr[curX][curY].getParCol();
+	//			System.out.println("new = " + curX+ " "+ curY);
+				curX = tempX;
+				curY = tempY;
+				pathX.add(curX);
+				pathY.add(curY);
+				gridArr[curX][curY].alongPath = true;
+			}
 		
-		//for (int i = 0; i < pathX.size(); i++) {
-    	//	System.out.println(pathX.get(i) + " " + pathY.get(i));
-    	//}
-//		System.out.println("pathX size is "+ pathX.size());
-//		System.out.println("!!!!!!!!" + gridArr[1][0].getParRow() + " " + gridArr[1][0].getParCol());
-//		System.out.println("ASDHAKSLJ" + gridArr[2][0].getParRow() + " " + gridArr[2][0].getParCol());
+		}
 	}
 	
-	public void visualize(Graphics g) {
-		int squareWidth = 45;
-		int spacing = 5;
+	public void visualize(Graphics g, int squareWidth, int spacing) {
 		g.fillRect(0, 0, gridArr[0].length * (squareWidth + spacing) + spacing, gridArr.length * (squareWidth + spacing) + spacing);
 		for (int i = 0; i < gridArr.length; i++) {
 			for (int j = 0; j < gridArr[0].length; j++) {
@@ -372,30 +393,8 @@ public class MazeSolver extends JFrame implements ActionListener{
 
     public static void main(String[] args) throws IOException {
 
-    	MazeSolver g = new MazeSolver(4, 5);
-//    	g.invalidateSquare(0, 1);
-//    	g.invalidateSquare(1, 1);
-//    	g.invalidateSquare(2, 1);
-//    	g.invalidateSquare(3, 1);
-//    	g.invalidateSquare(1, 3);
-//    	g.invalidateSquare(2, 3);
-//    	g.invalidateSquare(3, 3);
-//    	g.invalidateSquare(4, 3);
-//    	g.bfs(0, 2, 4, 4);
-//    	g.backtrack(0, 2, 0, 0);
-    	
-    
-//    	for (int i = 0; i < pathX.size(); i++) {
-//    		System.out.println(pathX.get(i) + " " + pathY.get(i));
-//    	}
-//    	for (int i = 0; i < 4; i++) {
-//    		for (int j = 0; j < 4; j++) {
-//    			if (g.getGridSquare(i, j).getAlongPath() == true) {
-//    				System.out.println(i + " " + j);
-//    			}
-////    			System.out.println(g.getGridSquare(i, j).getParRow() + " " + g.getGridSquare(i, j).getParCol());
-//    		}
-//    	}
+    	MazeSolver g = new MazeSolver(16, 14);
+
     	
     }
 
